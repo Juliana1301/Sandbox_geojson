@@ -1,32 +1,35 @@
-
+// Mapa y capa base
 var map = L.map("map");
+map.setView([4.628, -74.145], 15); // Centrado en tu polígono
 
-map.setView ([4.628229870972342, -74.06588664838725],15);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+}).addTo(map);
 
-
-
-var urlMap = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-var config = {
-    maxZoom: 19
-
-
-};
-var layer = L.tileLayer(urlMap, config);
-
-
-layer.addto(map)
-
-
-
-
-async function leerGeoJSON(url) {
-   
-    var response = await fetch (url);
-    return await response.json();
+// Cargar y mostrar GeoJSON
+async function cargarGeoJSON() {
+    try {
+        const response = await fetch("map.geojson");
+        const data = await response.json();
+        
+        // Crear capa con estilo visible
+        const capa = L.geoJSON(data, {
+            style: {
+                color: "black",
+                weight: 3,
+                fillColor: "gray",
+                fillOpacity: 0.5
+            }
+        }).addTo(map);
+        
+        // Ajustar vista al polígono
+        map.fitBounds(capa.getBounds());
+        
+    } catch (error) {
+        console.error("Error cargando GeoJSON:", error);
+    }
 }
-var myfile = leerGeoJSON("map.geojson");
 
-const geoLayer = L.geoJSON(myfile);
-
-geoLayer.addto(map)
+// Ejecutar
+cargarGeoJSON();
